@@ -205,21 +205,23 @@ If supplied, changes the color of all the non-transparent pixels to the given co
 
 ## Static Methods
 
-### `FastImage.preload: (source[]) => void`
+### `FastImage.preload: (source[]) => Promise<{ finishedCount: number, skippedCount: number }>`
 
 Preload images to display later. e.g.
 
 ```js
-FastImage.preload([
-    {
-        uri: 'https://facebook.github.io/react/img/logo_og.png',
-        headers: { Authorization: 'someAuthToken' },
-    },
-    {
-        uri: 'https://facebook.github.io/react/img/logo_og.png',
-        headers: { Authorization: 'someAuthToken' },
-    },
-])
+(async () => {
+  const { finishedCount, skippedCount } = await FastImage.preload([
+      {
+          uri: 'https://facebook.github.io/react/img/logo_og.png',
+          headers: { Authorization: 'someAuthToken' },
+      },
+      {
+          uri: 'https://facebook.github.io/react/img/logo_og.png',
+          headers: { Authorization: 'someAuthToken' },
+      },
+  ])
+})()
 ```
 
 ### `FastImage.clearMemoryCache: () => Promise<void>`
