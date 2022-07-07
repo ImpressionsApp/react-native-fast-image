@@ -34,7 +34,7 @@ class FastImageViewModule extends ReactContextBaseJavaModule {
             @Override
             public void run() {
                 for (int i = 0; i < sources.size(); i++) {
-                    System.out.println("preload: " + i);
+                    System.out.println("preload: " + sources.getString(i));
                     final ReadableMap source = sources.getMap(i);
                     final FastImageSource imageSource = FastImageViewConverter.getImageSource(activity, source);
 
@@ -51,6 +51,18 @@ class FastImageViewModule extends ReactContextBaseJavaModule {
                                     imageSource.isResource() ? imageSource.getUri() : imageSource.getGlideUrl()
                             )
                             .apply(FastImageViewConverter.getOptions(activity, imageSource, source))
+                            .listener(new RequestListener() {
+                                @Override
+                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target target, boolean isFirstResource) {
+                                    System.out.println("preload: " + sources.getString(i) + " failed");
+                                    return false;
+                                }
+                                @Override
+                                public boolean onResourceReady(Object resource, Object model, Target target, DataSource dataSource, boolean isFirstResource) {
+                                    System.out.println("preload: " + sources.getString(i) + " ready");
+                                    return false;
+                                }
+                            })
                             .preload();
                 }
             }
