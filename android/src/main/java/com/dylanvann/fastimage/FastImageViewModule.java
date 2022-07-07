@@ -23,6 +23,10 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.views.imagehelper.ImageSource;
 
 class FastImageViewModule extends ReactContextBaseJavaModule {
+    private Promise promise;
+    private int totalCount = 0;
+    private int preloadedCount = 0;
+    private int skippedCount = 0;
 
     private static final String REACT_CLASS = "FastImageView";
 
@@ -40,7 +44,8 @@ class FastImageViewModule extends ReactContextBaseJavaModule {
         final Activity activity = getCurrentActivity();
         if (activity == null) return;
 
-        PreloadResultHandler resultHandler = new PreloadResultHandler(promise, sources.size());
+        this.promise = promise;
+        this.totalCount = sources.size();
 
         activity.runOnUiThread(new Runnable() {
             @Override
@@ -69,13 +74,13 @@ class FastImageViewModule extends ReactContextBaseJavaModule {
                                 @Override
                                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target target, boolean isFirstResource) {
                                     System.out.println("preload: " + sourceString + " failed");
-                                    resultHandler.handleResult(false);
+                                    handlePreloadResult(false);
                                     return false;
                                 }
                                 @Override
                                 public boolean onResourceReady(Object resource, Object model, Target target, DataSource dataSource, boolean isFirstResource) {
                                     System.out.println("preload: " + sourceString + " ready");
-                                    resultHandler.handleResult(true);
+                                    handlePreloadResult(true);
                                     return false;
                                 }
                             })
@@ -122,32 +127,20 @@ class FastImageViewModule extends ReactContextBaseJavaModule {
         mapAsString.delete(mapAsString.length()-2, mapAsString.length()).append("}");
         return mapAsString.toString();
     }
-}
-
-class PreloadResultHandler {
-    private Promise promise;
-    private int totalCount = 0;
-    private int finishedCount = 0;
-    private int skippedCount = 0;
-
-    public PreloadResultHandler(Promise promise, int totalCount) {
-        this.promise = promise;
-        this.totalCount = totalCount;
-    }
 
     // Create a synchronized method to avoid race conditions when incrementing counts across multiple Glide preload processes
-    public synchronized void handleResult(boolean success) {
+    private synchronized void handlePreloadResult(boolean success) {
         if (success) {
-            this.finishedCount += 1;
+            this.preloadedCount += 1;
         } else {
             this.skippedCount += 1;
         }
 
-        boolean donePreloading = this.finishedCount + this.skippedCount == this.totalCount;
+        boolean donePreloading = this.preloadedCount + this.skippedCount == this.totalCount;
 
         if (donePreloading) {
             WritableMap result = Arguments.createMap();
-            result.putInt("finishedCount", this.finishedCount);
+            result.putInt("preloadedCount", this.preloadedCount);
             result.putInt("skippedCount", this.skippedCount);
             promise.resolve(result);
         }
