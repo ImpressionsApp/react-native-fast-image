@@ -34,7 +34,11 @@ RCT_EXPORT_METHOD(preload:(nonnull NSArray<FFFastImageSource *> *)sources
         [urls setObject:source.url atIndexedSubscript:idx];
     }];
 
-    [[SDWebImagePrefetcher sharedImagePrefetcher] prefetchURLs:urls progress:nil completed:^(NSUInteger finishedCount, NSUInteger skippedCount) { resolve(NULL); }];
+    [[SDWebImagePrefetcher sharedImagePrefetcher] prefetchURLs:urls progress:nil completed:^(NSUInteger finishedCount, NSUInteger skippedCount) {
+        NSNumber *finishedCountNumber = @(finishedCount);
+        NSNumber *skippedCountNumber = @(skippedCount);
+        resolve(@{ @"finishedCount": finishedCountNumber, @"skippedCount": skippedCountNumber });
+    }];
 }
 
 RCT_EXPORT_METHOD(clearMemoryCache:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
