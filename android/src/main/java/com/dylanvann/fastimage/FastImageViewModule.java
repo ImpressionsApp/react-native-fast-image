@@ -1,7 +1,5 @@
 package com.dylanvann.fastimage;
 
-import java.io.*;
-import java.util.HashMap;
 import java.util.function.Consumer;
 import android.app.Activity;
 import androidx.annotation.Nullable;
@@ -53,9 +51,6 @@ class FastImageViewModule extends ReactContextBaseJavaModule {
                 for (int i = 0; i < sources.size(); i++) {
                     final ReadableMap source = sources.getMap(i);
                     final FastImageSource imageSource = FastImageViewConverter.getImageSource(activity, source);
-                    final String sourceString = hashMapToString(source.toHashMap());
-
-                    System.out.println("preload: " + sourceString);
 
                     Glide
                             .with(activity.getApplicationContext())
@@ -73,15 +68,11 @@ class FastImageViewModule extends ReactContextBaseJavaModule {
                             .listener(new RequestListener() {
                                 @Override
                                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target target, boolean isFirstResource) {
-                                    System.out.println("preload: " + sourceString + " failed");
                                     handlePreloadResult(false);
-                                    return false;
                                 }
                                 @Override
                                 public boolean onResourceReady(Object resource, Object model, Target target, DataSource dataSource, boolean isFirstResource) {
-                                    System.out.println("preload: " + sourceString + " ready");
                                     handlePreloadResult(true);
-                                    return false;
                                 }
                             })
                             .preload();
@@ -117,15 +108,6 @@ class FastImageViewModule extends ReactContextBaseJavaModule {
 
         Glide.get(activity.getApplicationContext()).clearDiskCache();
         promise.resolve(null);
-    }
-
-    private String hashMapToString(HashMap<String, Object> map) {
-        StringBuilder mapAsString = new StringBuilder("{");
-        for (String key : map.keySet()) {
-            mapAsString.append(key + "=" + map.get(key) + ", ");
-        }
-        mapAsString.delete(mapAsString.length()-2, mapAsString.length()).append("}");
-        return mapAsString.toString();
     }
 
     // Create a synchronized method to avoid race conditions when incrementing counts across multiple Glide preload processes
