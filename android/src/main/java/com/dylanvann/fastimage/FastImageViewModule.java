@@ -25,7 +25,7 @@ import com.facebook.react.views.imagehelper.ImageSource;
 class FastImageViewModule extends ReactContextBaseJavaModule {
     private Promise promise;
     private int totalCount = 0;
-    private int preloadedCount = 0;
+    private int finishedCount = 0;
     private int skippedCount = 0;
 
     private static final String REACT_CLASS = "FastImageView";
@@ -131,16 +131,16 @@ class FastImageViewModule extends ReactContextBaseJavaModule {
     // Create a synchronized method to avoid race conditions when incrementing counts across multiple Glide preload processes
     private synchronized void handlePreloadResult(boolean success) {
         if (success) {
-            this.preloadedCount += 1;
+            this.finishedCount += 1;
         } else {
             this.skippedCount += 1;
         }
 
-        boolean donePreloading = this.preloadedCount + this.skippedCount == this.totalCount;
+        boolean donePreloading = this.finishedCount + this.skippedCount == this.totalCount;
 
         if (donePreloading) {
             WritableMap result = Arguments.createMap();
-            result.putInt("preloadedCount", this.preloadedCount);
+            result.putInt("finishedCount", this.finishedCount);
             result.putInt("skippedCount", this.skippedCount);
             promise.resolve(result);
         }
