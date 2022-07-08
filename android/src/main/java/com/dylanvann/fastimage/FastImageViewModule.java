@@ -68,10 +68,12 @@ class FastImageViewModule extends ReactContextBaseJavaModule {
                                 @Override
                                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target target, boolean isFirstResource) {
                                     handlePreloadResult(false);
+                                    return false;
                                 }
                                 @Override
                                 public boolean onResourceReady(Object resource, Object model, Target target, DataSource dataSource, boolean isFirstResource) {
                                     handlePreloadResult(true);
+                                    return true;
                                 }
                             })
                             .preload();
