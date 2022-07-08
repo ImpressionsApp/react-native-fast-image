@@ -1,6 +1,5 @@
 package com.dylanvann.fastimage;
 
-import java.util.function.Consumer;
 import android.app.Activity;
 import androidx.annotation.Nullable;
 
